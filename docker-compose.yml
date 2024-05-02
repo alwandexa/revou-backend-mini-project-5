@@ -1,0 +1,84 @@
+version: "3"
+
+services:
+  kong-database:
+    image: postgres:9.6
+    environment:
+      POSTGRES_DB: kong
+      POSTGRES_USER: kong
+      POSTGRES_PASSWORD: kong
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "kong"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - kong-data:/var/lib/postgresql/data
+
+  kong-migration:
+    image: kong:2.8
+    command: kong migrations bootstrap
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kong
+    depends_on:
+      - kong-database
+    restart: on-failure
+
+  kong:
+    image: kong:2.8
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kong
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_LOG_LEVEL: debug
+    depends_on:
+      - kong-database
+      - kong-migration
+      - rabbitmq
+    ports:
+      - 8000:8000
+      - 8443:8443
+      - 8001:8001
+      - 8444:8444
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+    restart: on-failure
+
+  konga:
+    image: pantsel/konga
+    environment:
+      NODE_ENV: production
+    depends_on:
+      - kong-database
+    ports:
+      - 1337:1337
+
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  notification:
+    build:
+      context: ./notification
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3000"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=notification_db
+
+volumes:
+  kong-data:
