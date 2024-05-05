@@ -68,6 +68,38 @@ services:
       - 5672:5672
       - 15672:15672
 
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ./.env
+    ports:
+      - $USER_SERVICE_LOCAL_PORT:$USER_SERVICE_LOCAL_PORT
+    environment:
+      - DB_HOST=user-db
+      - DB_USER=$USER_DB_USER
+      - DB_PASSWORD=$USER_DB_ROOT_PASSWORD
+      - DB_NAME=$USER_DB_DATABASE
+      - DB_PORT=$USER_DB_DOCKER_PORT
+      - APP_PORT=$USER_SERVICE_LOCAL_PORT
+    stdin_open: true
+    tty: true
+    depends_on:
+      - user-db
+    command: sh -c "npm run start"
+
+  user-db:
+    container_name: user-db
+    image: mysql:8.0
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=$USER_DB_ROOT_PASSWORD
+      - MYSQL_DATABASE=$USER_DB_DATABASE
+    ports:
+      - $USER_DB_LOCAL_PORT:$USER_DB_DOCKER_PORT
+
 volumes:
   db-data-kong-postgres:
 
