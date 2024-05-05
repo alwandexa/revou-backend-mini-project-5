@@ -1,0 +1,17 @@
+{
+  "dev": {
+    "driver": "mysql",
+    "user": {"ENV": "DB_USER"},
+    "password":  {"ENV": "DB_PASSWORD"},
+    "host":  {"ENV": "DB_HOST"},
+    "database": {"ENV": "DB_NAME"}
+  },
+  "prod": {
+    "driver": "mysql",
+    "user": "root",
+    "password":  "123456",
+    "host":  "localhost",
+    "port": 3307,
+    "database": "user_db"
+  }
+}
