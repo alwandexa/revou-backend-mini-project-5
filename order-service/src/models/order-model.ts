@@ -1,19 +1,10 @@
-export interface UserModel {
-  user_id: number;
-  name: string;
-  email: string;
-  password: string;
-  birthdate: Date;
-  role: string;
+export interface OrderModel {
+  order_id: number;
+  user_id: string;
+  order_date: string;
+  status: string;
 }
 
-export interface CreateUserRequest extends Omit<UserModel, "user_id" | "role"> {}
+export interface CreateUserRequest extends Omit<OrderModel, "user_id" | "role"> {}
 
-export interface CreateUserResponse extends Pick<UserModel, "user_id"> {}
-
-export interface LoginUserRequest
-  extends Pick<UserModel, "email" | "password"> {}
-
-export interface LoginUserResponse {
-  token: string;
-}
+export interface CreateUserResponse extends Pick<OrderModel, "user_id"> {}

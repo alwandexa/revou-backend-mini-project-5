@@ -1,6 +1,6 @@
 import { QueryError, ResultSetHeader, RowDataPacket } from "mysql2";
 
-import { CreateUserRequest, UserModel } from "../models/order-model";
+import { CreateUserRequest, OrderModel } from "../models/order-model";
 import { pool } from "../lib/database";
 
 const UserRepository = {
@@ -20,7 +20,7 @@ const UserRepository = {
         throw new Error("User not found");
       }
 
-      return rows[0] as UserModel;
+      return rows[0] as OrderModel;
   },
 };
 
