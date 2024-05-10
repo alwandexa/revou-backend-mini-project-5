@@ -100,6 +100,39 @@ services:
     ports:
       - $USER_DB_LOCAL_PORT:$USER_DB_DOCKER_PORT
 
+  order-db:
+    container_name: order-db
+    image: mysql:8.0
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=$ORDER_DB_ROOT_PASSWORD
+      - MYSQL_DATABASE=$ORDER_DB_DATABASE
+    ports:
+      - $ORDER_DB_LOCAL_PORT:$ORDER_DB_DOCKER_PORT
+
+  inventory-db:
+    container_name: inventory-db
+    image: mysql:8.0
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=$INVENTORY_DB_ROOT_PASSWORD
+      - MYSQL_DATABASE=$INVENTORY_DB_DATABASE
+    ports:
+      - $INVENTORY_DB_LOCAL_PORT:$INVENTORY_DB_DOCKER_PORT
+
+  notification-db:
+    container_name: notification-db
+    image: mysql:8.0
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=$NOTIFICATION_DB_ROOT_PASSWORD
+      - MYSQL_DATABASE=$NOTIFICATION_DB_DATABASE
+    ports:
+      - $NOTIFICATION_DB_LOCAL_PORT:$NOTIFICATION_DB_DOCKER_PORT
+
 volumes:
   db-data-kong-postgres:
 
