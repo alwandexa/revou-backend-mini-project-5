@@ -1,49 +1,48 @@
-import bcrypt from "bcrypt";
+import { CreateOrderRequest, CreateOrderResponse } from "../models/order-model";
+import { OrderRepository } from "../repositories/order-repository";
+import { getRabbitMQChannel } from "../utils/util";
 
-import { UserRepository } from "../repositories/order-repository";
-import {
-  CreateUserRequest,
-  CreateUserResponse,
-  LoginUserRequest,
-  LoginUserResponse,
-} from "../models/order-model";
-import { generateJwtToken } from "../utils/util";
+const OrderService = {
+  createOrderRabbit: async (
+    createUserRequest: CreateOrderRequest
+  ): Promise<CreateOrderResponse> => {
+    const createdOrderId = await OrderRepository.createOrder(createUserRequest);
 
-const UserService = {
-  register: async (
-    createUserRequest: CreateUserRequest
-  ): Promise<CreateUserResponse> => {
-    const hashedPassword = await bcrypt.hash(createUserRequest.password, 10);
-    const createdUserId = await UserRepository.createUser({
-      email: createUserRequest.email,
-      password: hashedPassword,
-      name: createUserRequest.name,
-      birthdate: createUserRequest.birthdate,
+    getRabbitMQChannel((channel) => {
+      const queue = "inventory_check_queue";
+
+      channel.sendToQueue(
+        queue,
+        Buffer.from(
+          JSON.stringify({ ...createUserRequest, order_id: createdOrderId })
+        )
+      );
     });
 
     return {
-      user_id: createdUserId,
+      order_id: createdOrderId,
     };
   },
-  login: async (
-    loginUserRequest: LoginUserRequest
-  ): Promise<LoginUserResponse> => {
-    const user = await UserRepository.getByEmail(loginUserRequest.email);
-    const isPasswordMatched = await bcrypt.compare(
-      loginUserRequest.password,
-      user.password
-    );
+  createOrderKafka: async (
+    createUserRequest: CreateOrderRequest
+  ): Promise<CreateOrderResponse> => {
+    const createdOrderId = await OrderRepository.createOrder(createUserRequest);
 
-    if (!isPasswordMatched) {
-      throw new Error("invalid password");
-    }
+    getRabbitMQChannel((channel) => {
+      const queue = "inventory_check_queue";
 
-    const jwtToken = await generateJwtToken(user.user_id, user.role);
+      channel.sendToQueue(
+        queue,
+        Buffer.from(
+          JSON.stringify({ ...createUserRequest, order_id: createdOrderId })
+        )
+      );
+    });
 
     return {
-      token: jwtToken,
+      order_id: createdOrderId,
     };
   },
 };
 
-export { UserService };
+export { OrderService };
