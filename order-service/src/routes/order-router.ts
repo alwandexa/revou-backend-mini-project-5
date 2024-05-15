@@ -1,9 +1,9 @@
 import { Router } from "express";
 
 import { OrderController } from "../controllers/order-controller";
-import { makeOrder } from "../order-service";
 
 const orderRouter = Router();
-orderRouter.post("/order/create", makeOrder);
+orderRouter.post("/order/create", OrderController.create);
+orderRouter.post("/order/create/kafka", OrderController.createWithKafka);
 
 export default orderRouter;
