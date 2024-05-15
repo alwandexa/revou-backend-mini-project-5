@@ -1,16 +1,30 @@
 import { Request, Response } from "express";
 
-import { CreateUserRequest, LoginUserRequest } from "../models/order-model";
-import { UserService } from "../services/order-service";
+import { CreateOrderRequest } from "../models/order-model";
+import { OrderService } from "../services/order-service";
 import { onError, onSuccess } from "../utils/util";
 
 const OrderController = {
   create: async (req: Request, res: Response) => {
     try {
-      const createUserRequest = req.body as CreateUserRequest;
-      const createUserReponse = await UserService.register(createUserRequest);
+      const createOrderRequest = req.body as CreateOrderRequest;
+      const createOrderReponse = await OrderService.createOrderRabbit(
+        createOrderRequest
+      );
 
-      onSuccess(res, createUserReponse, "registered", 201);
+      onSuccess(res, createOrderReponse, "processed", 200);
+    } catch (error: any) {
+      onError(res, error.message);
+    }
+  },
+  createWithKafka: async (req: Request, res: Response) => {
+    try {
+      const createOrderRequest = req.body as CreateOrderRequest;
+      const createOrderReponse = await OrderService.createOrderKafka(
+        createOrderRequest
+      );
+
+      onSuccess(res, createOrderReponse, "processed", 200);
     } catch (error: any) {
       onError(res, error.message);
     }
