@@ -1,27 +1,16 @@
-import { QueryError, ResultSetHeader, RowDataPacket } from "mysql2";
+import { ResultSetHeader } from "mysql2";
 
-import { CreateUserRequest, OrderModel } from "../models/order-model";
 import { pool } from "../lib/database";
+import { CreateOrderRequest } from "../models/order-model";
 
-const UserRepository = {
-  createUser: async (userModel: CreateUserRequest) => {
-    const query = `INSERT INTO users(email, password, name, role, birthdate) values('${userModel.email}', '${userModel.password}', '${userModel.name}', 'user', '${userModel.birthdate}')`;
+const OrderRepository = {
+  createOrder: async (createOrderRequest: CreateOrderRequest) => {
+    const query = `INSERT INTO orders(user_id, order_date, status, product_id, quantity) VALUES (:user_id, now(), 'processing', :product_id, :quantity)`;
 
-    const result = await pool.query<ResultSetHeader>(query);
+    const result = await pool.query<ResultSetHeader>(query, createOrderRequest);
 
     return result[0].insertId;
   },
-  getByEmail: async (email: string) => {
-      const query = `SELECT * FROM users where email = '${email}'`;
-
-      const [rows] = await pool.query<RowDataPacket[]>(query);
-
-      if (rows.length === 0) {
-        throw new Error("User not found");
-      }
-
-      return rows[0] as OrderModel;
-  },
 };
 
-export { UserRepository };
+export { OrderRepository };
