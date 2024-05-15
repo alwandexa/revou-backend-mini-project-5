@@ -3,8 +3,12 @@ export interface OrderModel {
   user_id: string;
   order_date: string;
   status: string;
+  product_id: number;
+  quantity: number;
+  price: number;
 }
 
-export interface CreateUserRequest extends Omit<OrderModel, "user_id" | "role"> {}
+export interface CreateOrderRequest
+  extends Omit<OrderModel, "order_id" | "price" | "order_date" | "status"> {}
 
-export interface CreateUserResponse extends Pick<OrderModel, "user_id"> {}
+export interface CreateOrderResponse extends Pick<OrderModel, "order_id"> {}
