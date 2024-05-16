@@ -42,9 +42,9 @@ const OrderService = {
       channel.assertQueue(queue, { durable: true });
 
       // Declare an exchange for publishing notification
-      channel.assertExchange(exchange, "fanout", { durable: false });
+      channel.assertExchange(exchange, "direct", { durable: true });
 
-      console.log("Inventory service waiting for messages...");
+      console.log("Update Order Service waiting for messages...");
 
       // Consume messages from inventory service
       channel.consume(

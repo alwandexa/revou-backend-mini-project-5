@@ -28,7 +28,7 @@ const OrderRepository = {
     return result[0].insertId;
   },
   updateOrderStatus: async (updateOrderStatus: UpdateOrderStatus) => {
-    const query = `UPDATE orders SET status = ${updateOrderStatus.status} WHERE order_id = ${updateOrderStatus.order_id};`;
+    const query = `UPDATE orders SET status = '${updateOrderStatus.status}' WHERE order_id = ${updateOrderStatus.order_id};`;
 
     const result = await pool.query<ResultSetHeader>(query);
 

@@ -1,5 +1,6 @@
 import app from "./app";
 import { appConfig } from "./config/config";
+import { OrderService } from "./services/order-service";
 // import { orderConsumer } from "./lib/kafka/order-consumer";
 // import { orderProducer } from "./lib/kafka/order-producer";
 
@@ -9,4 +10,5 @@ app.listen(PORT, () => {
   console.log(`Server is running in http://localhost:${PORT}`);
 });
 
+OrderService.updateOrderService()
 // orderConsumer();
