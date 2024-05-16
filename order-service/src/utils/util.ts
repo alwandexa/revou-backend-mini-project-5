@@ -41,7 +41,7 @@ export const generateJwtToken = (
       exp: Math.floor(fiveMinutesLater / 1000),
     };
 
-    jwt.sign(payload, process.env.JWT_KEYWORD as string, (err, token) => {
+    jwt.sign(payload, appConfig.JWT_KEYWORD as string, (err, token) => {
       if (err) {
         reject(err);
         return;
@@ -54,7 +54,7 @@ export const generateJwtToken = (
 
 export const verifyJwtToken = (token: string): Promise<any> => {
   return new Promise<any>((resolve, reject) => {
-    jwt.verify(token, process.env.JWT_KEYWORD as string, (err, payload) => {
+    jwt.verify(token, appConfig.JWT_KEYWORD as string, (err, payload) => {
       if (err) {
         reject(err);
         return;

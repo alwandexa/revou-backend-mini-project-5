@@ -14,6 +14,7 @@ export const appConfig = {
   KAFKA_API_KEY : process.env.KAFKA_API_KEY || "",
   KAFKA_API_SECRET : process.env.KAFKA_API_SECRET || "",
   KAFKA_RESOURCE : process.env.KAFKA_RESOURCE || "",
+  JWT_KEYWORD: process.env.JWT_KEYWORD || "",
   dialect: "mysql",
   pool: {
     max: 5,
