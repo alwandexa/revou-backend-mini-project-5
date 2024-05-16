@@ -5,9 +5,25 @@ import { CreateOrderRequest } from "../models/order-model";
 
 const OrderRepository = {
   createOrder: async (createOrderRequest: CreateOrderRequest) => {
-    const query = `INSERT INTO orders(user_id, order_date, status, product_id, quantity) VALUES (:user_id, now(), 'processing', :product_id, :quantity)`;
+    console.log("createOrderRequest", createOrderRequest)
+    const query = `INSERT
+    INTO
+    orders(
+      user_id,
+      order_date,
+      status,
+      product_id,
+      quantity
+    )
+  VALUES (
+    ${createOrderRequest.user_id},
+    now(),
+    'processing',
+    ${createOrderRequest.product_id},
+    ${createOrderRequest.quantity}
+  )`;
 
-    const result = await pool.query<ResultSetHeader>(query, createOrderRequest);
+    const result = await pool.query<ResultSetHeader>(query);
 
     return result[0].insertId;
   },

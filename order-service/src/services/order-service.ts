@@ -1,3 +1,4 @@
+import { orderProducer } from "../lib/kafka/order-producer";
 import { CreateOrderRequest, CreateOrderResponse } from "../models/order-model";
 import { OrderRepository } from "../repositories/order-repository";
 import { getRabbitMQChannel } from "../utils/util";
@@ -26,21 +27,10 @@ const OrderService = {
   createOrderKafka: async (
     createUserRequest: CreateOrderRequest
   ): Promise<CreateOrderResponse> => {
-    const createdOrderId = await OrderRepository.createOrder(createUserRequest);
-
-    getRabbitMQChannel((channel) => {
-      const queue = "inventory_check_queue";
-
-      channel.sendToQueue(
-        queue,
-        Buffer.from(
-          JSON.stringify({ ...createUserRequest, order_id: createdOrderId })
-        )
-      );
-    });
+    orderProducer();
 
     return {
-      order_id: createdOrderId,
+      order_id: 1,
     };
   },
   monitorOrder: () => {
@@ -68,7 +58,7 @@ const OrderService = {
             } else {
               // UPDATE ORDER STATUS TO FAILED
             }
-            
+
             // Publish notification
             channel.publish(exchange, "", Buffer.from(JSON.stringify(order)));
             console.log("Notification sent for order:", order);
