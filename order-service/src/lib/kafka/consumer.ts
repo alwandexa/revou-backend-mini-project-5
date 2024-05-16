@@ -1,6 +1,6 @@
 import { kafka } from "./client";
 
-const consumer = kafka.consumer({ groupId: "alwan-order" });
+export const consumer = kafka.consumer({ groupId: "alwan-order" });
 
 export const orderConsumer = async () => {
   // Producing

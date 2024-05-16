@@ -1,13 +1,16 @@
-import { orderProducer } from "../lib/kafka/order-producer";
+import { consumer } from "../lib/kafka/consumer";
+import { kafkaProducer } from "../lib/kafka/producer";
 import { CreateOrderRequest, CreateOrderResponse } from "../models/order-model";
 import { OrderRepository } from "../repositories/order-repository";
 import { getRabbitMQChannel } from "../utils/util";
 
 const OrderService = {
   createOrderRabbit: async (
-    createUserRequest: CreateOrderRequest
+    createOrderRequest: CreateOrderRequest
   ): Promise<CreateOrderResponse> => {
-    const createdOrderId = await OrderRepository.createOrder(createUserRequest);
+    const createdOrderId = await OrderRepository.createOrder(
+      createOrderRequest
+    );
 
     getRabbitMQChannel((channel) => {
       const queue = "inventory_check_queue";
@@ -15,7 +18,7 @@ const OrderService = {
       channel.sendToQueue(
         queue,
         Buffer.from(
-          JSON.stringify({ ...createUserRequest, order_id: createdOrderId })
+          JSON.stringify({ ...createOrderRequest, order_id: createdOrderId })
         )
       );
     });
@@ -25,12 +28,31 @@ const OrderService = {
     };
   },
   createOrderKafka: async (
-    createUserRequest: CreateOrderRequest
+    createOrderRequest: CreateOrderRequest
   ): Promise<CreateOrderResponse> => {
-    orderProducer();
+    const createdOrderId = await OrderRepository.createOrder(
+      createOrderRequest
+    );
+
+    await kafkaProducer.connect();
+
+    await kafkaProducer.send({
+      topic: "dxg-digicamp-microservices-test",
+      messages: [
+        {
+          value: Buffer.from(
+            JSON.stringify({
+              owner: "alwan",
+              type: "inventory_check",
+              payload: { ...createOrderRequest, order_id: createdOrderId },
+            })
+          ),
+        },
+      ],
+    });
 
     return {
-      order_id: 1,
+      order_id: createdOrderId,
     };
   },
   updateOrderService: () => {
@@ -44,27 +66,59 @@ const OrderService = {
       // Declare an exchange for publishing notification
       channel.assertExchange(exchange, "direct", { durable: true });
 
-      console.log("Update Order Service waiting for messages...");
+      console.log("RabbitMQ - Update Order Service waiting for messages...");
 
       // Consume messages from inventory service
       channel.consume(
         queue,
-        (message) => {
+        async (message) => {
           if (message) {
             const order = JSON.parse(message.content.toString());
 
-            OrderRepository.updateOrderStatus({
+            await OrderRepository.updateOrderStatus({
               order_id: order.order_id,
               status: order.status,
             });
 
             // Publish notification
             channel.publish(exchange, "", Buffer.from(JSON.stringify(order)));
-            console.log("Notification sent for order:", order.order_id);
+            console.log(
+              "RabbitMQ - Notification sent for order using:",
+              order.order_id
+            );
           }
         },
         { noAck: true }
       );
+    });
+  },
+  updateOrderKafka: async () => {
+    console.log("Kafka - Update Order Service waiting for messages...");
+
+    await consumer.connect();
+
+    await consumer.subscribe({
+      topic: "dxg-digicamp-microservices-test",
+      fromBeginning: true,
+    });
+
+    await consumer.run({
+      eachMessage: async ({ topic, partition, message }) => {
+        const order = JSON.parse(message.value?.toString() as string) as any;
+
+        console.log("order", order.owner);
+        if (order.owner == "alwan" && order.type == "update_order") {
+          await OrderRepository.updateOrderStatus({
+            order_id: order.order_id,
+            status: order.status,
+          });
+
+          console.log(
+            "Kafka - Notification sent for order using:",
+            order.order_id
+          );
+        }
+      },
     });
   },
 };
