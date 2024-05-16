@@ -33,8 +33,8 @@ const OrderService = {
       order_id: 1,
     };
   },
-  monitorOrder: () => {
-    const queue = "monitor_order_queue";
+  updateOrderService: () => {
+    const queue = "update_order_queue";
     const exchange = "notification_exchange";
 
     getRabbitMQChannel((channel) => {
@@ -53,15 +53,14 @@ const OrderService = {
           if (message) {
             const order = JSON.parse(message.content.toString());
 
-            if (order.is_enough) {
-              // UPDATE ORDER STATUS TO DONE
-            } else {
-              // UPDATE ORDER STATUS TO FAILED
-            }
+            OrderRepository.updateOrderStatus({
+              order_id: order.order_id,
+              status: order.status,
+            });
 
             // Publish notification
             channel.publish(exchange, "", Buffer.from(JSON.stringify(order)));
-            console.log("Notification sent for order:", order);
+            console.log("Notification sent for order:", order.order_id);
           }
         },
         { noAck: true }
