@@ -30,6 +30,7 @@ export const InventoryService = {
 
               let params = {
                 order_id: order.order_id,
+                user_id: order.user_id,
                 status: "",
               };
 
