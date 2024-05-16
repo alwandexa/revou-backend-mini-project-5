@@ -1,4 +1,4 @@
-import { getRabbitMQChannel } from "./utils/util";
+import { getRabbitMQChannel } from "../utils/util";
 
 export const inventoryService = () => {
   const queue = "inventory_check_queue";
@@ -7,9 +7,6 @@ export const inventoryService = () => {
   getRabbitMQChannel((channel) => {
     // Declare a queue for receiving messages from order service
     channel.assertQueue(queue, { durable: true });
-
-    // Declare an exchange for publishing notification
-    channel.assertExchange(exchange, "fanout", { durable: false });
 
     console.log("Inventory service waiting for messages...");
 
@@ -38,5 +35,3 @@ export const inventoryService = () => {
 const checkInventory = (order: any) => {
   if (order) return true;
 };
-
-inventoryService();

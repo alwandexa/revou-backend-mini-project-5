@@ -4,7 +4,7 @@
   "description": "revou's restful api mini project",
   "scripts": {
     "test": "jest --coverage",
-    "start": "node -r ts-node/register ./src/inventory-service.ts",
+    "start": "node -r ts-node/register ./src/server.ts",
     "start:watch": "nodemon",
     "build": "tsc",
     "migrate": "db-migrate up -e prod",
