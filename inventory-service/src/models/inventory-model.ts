@@ -13,3 +13,8 @@ export interface CheckStockRequest extends Pick<InventoryModel, "product_id"> {
 export interface CheckStockResponse {
   is_enough: boolean;
 }
+
+export interface GetProduct extends InventoryModel {}
+
+export interface UpdateStock
+  extends Pick<InventoryModel, "product_id" | "stock"> {}

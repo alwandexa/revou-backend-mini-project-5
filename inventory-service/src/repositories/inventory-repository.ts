@@ -1,25 +1,35 @@
-import { ResultSetHeader } from "mysql2";
+import { RowDataPacket } from "mysql2";
 
-import { pool } from "../lib/database";
-import { CheckStockRequest } from "../models/inventory-model";
+import { PoolConnection } from "mysql2/promise";
+import {
+  GetProduct,
+  InventoryModel,
+  UpdateStock,
+} from "../models/inventory-model";
 
 const InventoryRepository = {
-  lockProduct: async (product_id :number) => {
-    const query = ``;
+  lockProduct: async (product_id: number, connection: PoolConnection) => {
+    const query = `SELECT product_id, name, description, price, stock FROM products WHERE product_id = ${product_id} FOR UPDATE;`;
 
-    const result = await pool.query<ResultSetHeader>(query, {
-      product_id: product_id,
-    });
+    const [rows] = await connection.query<RowDataPacket[]>(query);
 
-    return result[0].insertId;
+    return rows[0] as InventoryModel;
   },
-  checkStock: async (checkStockRequest: CheckStockRequest) => {
-    const query = ``;
+  getProduct: async (getProduct: GetProduct, connection: PoolConnection) => {
+    const query = `SELECT product_id, name, description, price, stock FROM products WHERE product_id = ${getProduct.product_id};`;
 
-    const result = await pool.query<ResultSetHeader>(query, checkStockRequest);
+    const [rows] = await connection.query<RowDataPacket[]>(query);
 
-    return result[0].insertId;
+    return rows[0];
+  },
+  updateStock: async (updateStock: UpdateStock, connection: PoolConnection) => {
+    const query = `UPDATE products SET stock = ${updateStock.stock} WHERE product_id = ${updateStock.product_id};`;
+
+    const [rows] = await connection.query<RowDataPacket[]>(query);
+
+    return rows[0];
   },
 };
 
 export { InventoryRepository };
+
