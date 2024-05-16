@@ -1,3 +1,3 @@
-import { inventoryService } from "./services/inventory-service";
+import { InventoryService } from "./services/inventory-service";
 
-inventoryService();
+InventoryService.checkInventoryService();
