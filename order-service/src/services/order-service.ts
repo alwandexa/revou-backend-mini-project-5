@@ -106,19 +106,38 @@ const OrderService = {
       eachMessage: async ({ topic, partition, message }) => {
         const order = JSON.parse(message.value?.toString() as string) as any;
 
-        console.log("order", order.owner);
         if (order.owner == "alwan" && order.type == "update_order") {
+          console.log("update order kafka", order);
           await OrderRepository.updateOrderStatus({
-            order_id: order.order_id,
-            status: order.status,
+            order_id: order.payload.order_id,
+            status: order.payload.status,
           });
 
+          OrderService.createOrderNotificationKafka(order.payload);
           console.log(
-            "Kafka - Notification sent for order using:",
-            order.order_id
+            "Kafka - Notification sent for order ",
+            order.payload.order_id
           );
         }
       },
+    });
+  },
+  createOrderNotificationKafka: async (params: any) => {
+    await kafkaProducer.connect();
+
+    await kafkaProducer.send({
+      topic: "dxg-digicamp-microservices-test",
+      messages: [
+        {
+          value: Buffer.from(
+            JSON.stringify({
+              owner: "alwan",
+              type: "create_notification",
+              payload: params,
+            })
+          ),
+        },
+      ],
     });
   },
 };
