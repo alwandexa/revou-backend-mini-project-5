@@ -10,6 +10,10 @@ export const appConfig = {
   DB_PORT: process.env.DB_PORT || 3308,
   APP_PORT: process.env.APP_PORT || 3101,
   RABBITMQ_URL : process.env.RABBITMQ_URL || "amqp://localhost",
+  KAFKA_URL : process.env.KAFKA_SERVER || "",
+  KAFKA_API_KEY : process.env.KAFKA_API_KEY || "",
+  KAFKA_API_SECRET : process.env.KAFKA_API_SECRET || "",
+  KAFKA_RESOURCE : process.env.KAFKA_RESOURCE || "",
   dialect: "mysql",
   pool: {
     max: 5,
