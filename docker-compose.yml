@@ -100,6 +100,27 @@ services:
     ports:
       - $USER_DB_LOCAL_PORT:$USER_DB_DOCKER_PORT
 
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ./.env
+    ports:
+      - $ORDER_SERVICE_LOCAL_PORT:$ORDER_SERVICE_LOCAL_PORT
+    environment:
+      - DB_HOST=order-db
+      - DB_USER=$ORDER_DB_ORDER
+      - DB_PASSWORD=$ORDER_DB_ROOT_PASSWORD
+      - DB_NAME=$ORDER_DB_DATABASE
+      - DB_PORT=$ORDER_DB_DOCKER_PORT
+      - APP_PORT=$ORDER_SERVICE_LOCAL_PORT
+    stdin_open: true
+    tty: true
+    depends_on:
+      - order-db
+    command: sh -c "npm run start"
+
   order-db:
     container_name: order-db
     image: mysql:8.0
@@ -111,6 +132,27 @@ services:
     ports:
       - $ORDER_DB_LOCAL_PORT:$ORDER_DB_DOCKER_PORT
 
+  inventory-service:
+    build:
+      context: ./inventory-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ./.env
+    ports:
+      - $INVENTORY_SERVICE_LOCAL_PORT:$INVENTORY_SERVICE_LOCAL_PORT
+    environment:
+      - DB_HOST=inventory-db
+      - DB_USER=$INVENTORY_DB_ORDER
+      - DB_PASSWORD=$INVENTORY_DB_ROOT_PASSWORD
+      - DB_NAME=$INVENTORY_DB_DATABASE
+      - DB_PORT=$INVENTORY_DB_DOCKER_PORT
+      - APP_PORT=$INVENTORY_SERVICE_LOCAL_PORT
+    stdin_open: true
+    tty: true
+    depends_on:
+      - inventory-db
+    command: sh -c "npm run start"
+
   inventory-db:
     container_name: inventory-db
     image: mysql:8.0
@@ -121,6 +163,27 @@ services:
       - MYSQL_DATABASE=$INVENTORY_DB_DATABASE
     ports:
       - $INVENTORY_DB_LOCAL_PORT:$INVENTORY_DB_DOCKER_PORT
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ./.env
+    ports:
+      - $NOTIFICATION_SERVICE_LOCAL_PORT:$NOTIFICATION_SERVICE_LOCAL_PORT
+    environment:
+      - DB_HOST=notification-db
+      - DB_USER=$NOTIFICATION_DB_ORDER
+      - DB_PASSWORD=$NOTIFICATION_DB_ROOT_PASSWORD
+      - DB_NAME=$NOTIFICATION_DB_DATABASE
+      - DB_PORT=$NOTIFICATION_DB_DOCKER_PORT
+      - APP_PORT=$NOTIFICATION_SERVICE_LOCAL_PORT
+    stdin_open: true
+    tty: true
+    depends_on:
+      - notification-db
+    command: sh -c "npm run start"
 
   notification-db:
     container_name: notification-db
