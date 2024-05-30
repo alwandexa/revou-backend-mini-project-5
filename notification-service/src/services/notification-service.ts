@@ -62,20 +62,28 @@ export const NotificationService = {
 
     await kafkaConsumer.run({
       eachMessage: async ({ topic, partition, message }) => {
-        const order = JSON.parse(message.value?.toString() as string) as any;
+        try {
+          if (message.value !== null) {
+            const order = JSON.parse(
+              message.value?.toString() as string
+            ) as any;
 
-        if (order.owner == "alwan" && order.type == "create_notification") {
-          const params = {
-            order_id: order.payload.order_id,
-            user_id: order.payload.user_id,
-            notification_type: "push",
-          } as CreateNotification;
-          await NotificationRepository.createNotification(params);
+            if (order.owner == "alwan" && order.type == "create_notification") {
+              const params = {
+                order_id: order.payload.order_id,
+                user_id: order.payload.user_id,
+                notification_type: "push",
+              } as CreateNotification;
+              await NotificationRepository.createNotification(params);
 
-          console.log(
-            "Kafka - Notification created for order:",
-            order.payload.order_id
-          );
+              console.log(
+                "Kafka - Notification created for order:",
+                order.payload.order_id
+              );
+            }
+          }
+        } catch (error) {
+          console.log("createNotificationKafka error", error);
         }
       },
     });
