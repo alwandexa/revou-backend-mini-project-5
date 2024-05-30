@@ -7,6 +7,7 @@ import {
   InventoryModel,
   UpdateStock,
 } from "../models/inventory-model";
+import { pool } from "../lib/database";
 
 const InventoryRepository = {
   createProduct: async (
@@ -21,6 +22,13 @@ const InventoryRepository = {
     );
 
     return result;
+  },
+  getAllProducts: async () => {
+    const query = `SELECT product_id, name, description, price, stock FROM products`;
+
+    const [rows] = await pool.query<RowDataPacket[]>(query);
+
+    return rows;
   },
   lockProduct: async (product_id: number, connection: PoolConnection) => {
     const query = `SELECT product_id, name, description, price, stock FROM products WHERE product_id = ${product_id} FOR UPDATE;`;

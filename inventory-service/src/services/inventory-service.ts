@@ -18,6 +18,11 @@ export const InventoryService = {
 
     return createdProduct;
   },
+  getAllProducts: async () => {
+    const allProducts = await InventoryRepository.getAllProducts();
+
+    return allProducts;
+  },
   checkInventoryRabbit: () => {
     const queue = "inventory_check_queue";
 
