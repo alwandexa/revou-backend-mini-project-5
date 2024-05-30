@@ -104,20 +104,27 @@ const OrderService = {
 
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
-        const order = JSON.parse(message.value?.toString() as string) as any;
-
-        if (order.owner == "alwan" && order.type == "update_order") {
-          console.log("update order kafka", order);
-          await OrderRepository.updateOrderStatus({
-            order_id: order.payload.order_id,
-            status: order.payload.status,
-          });
-
-          OrderService.createOrderNotificationKafka(order.payload);
-          console.log(
-            "Kafka - Notification sent for order ",
-            order.payload.order_id
-          );
+        try {
+          if (message.value !== null) {
+            console.log("message value", message.value.toString())
+            const order = JSON.parse(message.value?.toString() as string) as any;
+  
+            if (order.owner == "alwan" && order.type == "update_order") {
+              console.log("update order kafka", order);
+              await OrderRepository.updateOrderStatus({
+                order_id: order.payload.order_id,
+                status: order.payload.status,
+              });
+  
+              OrderService.createOrderNotificationKafka(order.payload);
+              console.log(
+                "Kafka - Notification sent for order ",
+                order.payload.order_id
+              );
+            }
+          }
+        } catch (error) {
+          console.log("updateOrderKafka error", error)
         }
       },
     });
