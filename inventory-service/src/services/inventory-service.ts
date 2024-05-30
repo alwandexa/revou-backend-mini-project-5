@@ -1,10 +1,23 @@
+import { PoolConnection } from "mysql2/promise";
 import { pool } from "../lib/database";
 import { kafkaConsumer } from "../lib/kafka/consumer";
 import { kafkaProducer } from "../lib/kafka/producer";
+import { CreateProductRequest } from "../models/inventory-model";
 import { InventoryRepository } from "../repositories/inventory-repository";
 import { getRabbitMQChannel } from "../utils/util";
 
 export const InventoryService = {
+  createInventory: async (
+    createProductRequest: CreateProductRequest,
+    connection: PoolConnection
+  ) => {
+    const createdProduct = await InventoryRepository.createProduct(
+      createProductRequest,
+      connection
+    );
+
+    return createdProduct;
+  },
   checkInventoryRabbit: () => {
     const queue = "inventory_check_queue";
 
@@ -78,56 +91,60 @@ export const InventoryService = {
 
     await kafkaConsumer.run({
       eachMessage: async ({ topic, partition, message }) => {
-        const order = JSON.parse(message.value?.toString() as string) as any;
+        try {
+          if (message.value !== null) {
+            const order = JSON.parse(
+              message.value?.toString() as string
+            ) as any;
 
-        console.log("checkInventoryKafka");
+            if (order.owner == "alwan" && order.type == "inventory_check") {
+              console.log("checkInventoryKafka order", order);
+              const orderData = order.payload;
+              const connection = await pool.getConnection();
 
-        if (order.owner == "alwan" && order.type == "inventory_check") {
-          console.log("checkInventoryKafka order", order)
-          const orderData = order.payload
-          const connection = await pool.getConnection();
-          
-          await connection.beginTransaction();
-          
-          try {
-            const product = await InventoryRepository.lockProduct(
-              orderData.product_id,
-              connection
-            );
-  
-            console.log("product", product)
+              await connection.beginTransaction();
 
-            let params = {
-              order_id: orderData.order_id,
-              user_id: orderData.user_id,
-              status: "",
-            };
+              try {
+                const product = await InventoryRepository.lockProduct(
+                  orderData.product_id,
+                  connection
+                );
 
-            if (orderData.quantity <= product.stock) {
-              // UPDATE STATUS ORDER & REDUCE STOCK
-              params.status = "done";
-              const updatedStock = product.stock - orderData.quantity;
+                let params = {
+                  order_id: orderData.order_id,
+                  user_id: orderData.user_id,
+                  status: "",
+                };
 
-              await InventoryRepository.updateStock(
-                { product_id: orderData.product_id, stock: updatedStock },
-                connection
-              );
-              console.log("Order status set to Done", orderData);
-            } else {
-              // UPDATE STATUS ORDER FAILED
-              params.status = "failed";
-              console.log("Order status set to Failed", orderData);
+                if (orderData.quantity <= product.stock) {
+                  // UPDATE STATUS ORDER & REDUCE STOCK
+                  params.status = "done";
+                  const updatedStock = product.stock - orderData.quantity;
+
+                  await InventoryRepository.updateStock(
+                    { product_id: orderData.product_id, stock: updatedStock },
+                    connection
+                  );
+                  console.log("Order status set to Done", orderData);
+                } else {
+                  // UPDATE STATUS ORDER FAILED
+                  params.status = "failed";
+                  console.log("Order status set to Failed", orderData);
+                }
+
+                InventoryService.updateOrderStatusKafka(params);
+
+                connection.commit();
+                connection.release();
+              } catch (error) {
+                console.log("checkInventoryKafka error", error);
+                connection.rollback();
+                connection.release();
+              }
             }
-
-            InventoryService.updateOrderStatusKafka(params);
-
-            connection.commit();
-            connection.release();
-          } catch (error) {
-            console.log("checkInventoryKafka error", error)
-            connection.rollback();
-            connection.release();
           }
+        } catch (error) {
+          console.log("checkInventoryKafka error", error);
         }
       },
     });
@@ -142,7 +159,7 @@ export const InventoryService = {
   updateOrderStatusKafka: async (params: any) => {
     await kafkaProducer.connect();
 
-    console.log("updateOrderStatusKafka", params)
+    console.log("updateOrderStatusKafka", params);
 
     await kafkaProducer.send({
       topic: "dxg-digicamp-microservices-test",

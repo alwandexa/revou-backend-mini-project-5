@@ -6,6 +6,8 @@ export interface InventoryModel {
   stock: number;
 }
 
+export interface CreateProductRequest extends Omit<InventoryModel, 'product_id'> {}
+
 export interface CheckStockRequest extends Pick<InventoryModel, "product_id"> {
   amount: number;
 }
