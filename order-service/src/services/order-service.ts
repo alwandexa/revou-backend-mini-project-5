@@ -1,6 +1,6 @@
 import { consumer } from "../lib/kafka/consumer";
 import { kafkaProducer } from "../lib/kafka/producer";
-import { CreateOrderRequest, CreateOrderResponse } from "../models/order-model";
+import { CreateOrderRequest, CreateOrderResponse, GetOrderByIdRequest } from "../models/order-model";
 import { OrderRepository } from "../repositories/order-repository";
 import { getRabbitMQChannel } from "../utils/util";
 
@@ -147,6 +147,11 @@ const OrderService = {
       ],
     });
   },
+  getOrderById: async (getOrderByIdRequest: GetOrderByIdRequest) => {
+    const result = await OrderRepository.getOrderById(getOrderByIdRequest)
+
+    return result;
+  }
 };
 
 export { OrderService };

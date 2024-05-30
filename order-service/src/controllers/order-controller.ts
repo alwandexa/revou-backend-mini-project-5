@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import { CreateOrderRequest } from "../models/order-model";
+import { CreateOrderRequest, GetOrderByIdRequest } from "../models/order-model";
 import { OrderService } from "../services/order-service";
 import { onError, onSuccess } from "../utils/util";
 
@@ -29,6 +29,18 @@ const OrderController = {
       onError(res, error.message);
     }
   },
+  getOrderById: async (req: Request, res:Response) => {
+    try {
+      const getOrderRequest = req.body as GetOrderByIdRequest;
+      const order = await OrderService.getOrderById(
+        getOrderRequest
+      );
+
+      onSuccess(res, order, "fetched", 200);
+    } catch (error: any) {
+      onError(res, error.message);
+    }
+  }
 };
 
 export { OrderController };

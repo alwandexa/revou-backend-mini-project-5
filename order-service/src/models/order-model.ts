@@ -15,3 +15,5 @@ export interface CreateOrderResponse extends Pick<OrderModel, "order_id"> {}
 
 export interface UpdateOrderStatus
   extends Pick<OrderModel, "order_id" | "status"> {}
+
+export interface GetOrderByIdRequest extends Pick<OrderModel, "order_id"> {}

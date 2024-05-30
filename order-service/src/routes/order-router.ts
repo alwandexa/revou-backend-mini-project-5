@@ -14,5 +14,10 @@ orderRouter.post(
   authMiddleware("user"),
   OrderController.createWithKafka
 );
+orderRouter.post(
+  "/order",
+  authMiddleware("user"),
+  OrderController.getOrderById
+);
 
 export default orderRouter;

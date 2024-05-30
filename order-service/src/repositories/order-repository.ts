@@ -1,7 +1,11 @@
-import { ResultSetHeader } from "mysql2";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 import { pool } from "../lib/database";
-import { CreateOrderRequest, UpdateOrderStatus } from "../models/order-model";
+import {
+  CreateOrderRequest,
+  GetOrderByIdRequest,
+  UpdateOrderStatus,
+} from "../models/order-model";
 
 const OrderRepository = {
   createOrder: async (createOrderRequest: CreateOrderRequest) => {
@@ -26,6 +30,14 @@ const OrderRepository = {
     const result = await pool.query<ResultSetHeader>(query);
 
     return result[0].insertId;
+  },
+  getOrderById: async (getOrderByIdRequest: GetOrderByIdRequest) => {
+    const query = `SELECT user_id, order_date, status, product_id, quantity FROM orders WHERE order_id = :orderId`;
+    const result = await pool.execute<RowDataPacket[]>(query, [
+      getOrderByIdRequest,
+    ]);
+
+    return result[0];
   },
   updateOrderStatus: async (updateOrderStatus: UpdateOrderStatus) => {
     const query = `UPDATE orders SET status = '${updateOrderStatus.status}' WHERE order_id = ${updateOrderStatus.order_id};`;
