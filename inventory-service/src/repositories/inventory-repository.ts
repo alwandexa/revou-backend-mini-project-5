@@ -13,7 +13,7 @@ const InventoryRepository = {
     createProductRequest: CreateProductRequest,
     connection: PoolConnection
   ) => {
-    const query = `INSERT INTO products (product_id, name, description, price, stock) VALUES (:product_id, :name, :description, :price, :stock)`;
+    const query = `INSERT INTO products (name, description, price, stock) VALUES ('${createProductRequest.name}', '${createProductRequest.description}', ${createProductRequest.price}, ${createProductRequest.stock})`;
 
     const result = await connection.query<ResultSetHeader[]>(
       query,
