@@ -8,7 +8,7 @@ export const appConfig = {
   PASSWORD: process.env.DB_PASSWORD || "123456",
   DB_NAME: process.env.DB_NAME || "inventory_db",
   DB_PORT: process.env.DB_PORT || 3308,
-  APP_PORT: process.env.APP_PORT || 3101,
+  APP_PORT: process.env.APP_PORT || 3102,
   RABBITMQ_URL : process.env.RABBITMQ_URL || "amqp://localhost",
   KAFKA_URL : process.env.KAFKA_SERVER || "",
   KAFKA_API_KEY : process.env.KAFKA_API_KEY || "",
