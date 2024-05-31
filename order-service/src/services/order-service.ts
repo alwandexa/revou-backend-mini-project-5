@@ -13,10 +13,10 @@ const OrderService = {
     );
 
     getRabbitMQChannel((channel) => {
-      const queue = "inventory_check_queue";
+      const QUEUE = "inventory_check_queue";
 
       channel.sendToQueue(
-        queue,
+        QUEUE,
         Buffer.from(
           JSON.stringify({ ...createOrderRequest, order_id: createdOrderId })
         )

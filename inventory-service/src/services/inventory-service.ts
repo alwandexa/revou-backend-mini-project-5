@@ -156,9 +156,9 @@ export const InventoryService = {
   },
   updateOrderStatusRabbit: (params: any) => {
     getRabbitMQChannel((channel) => {
-      const queue = "update_order_queue";
+      const QUEUE = "update_order_queue";
 
-      channel.sendToQueue(queue, Buffer.from(JSON.stringify(params)));
+      channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(params)));
     });
   },
   updateOrderStatusKafka: async (params: any) => {
