@@ -7,10 +7,10 @@ export const NotificationService = {
   createNotificationRabbit: () => {
     try {
       getRabbitMQChannel((channel) => {
-        const exchange = "notification_exchange";
+        const EXCHANGE = "notification_exchange";
 
-        // Declare an exchange for receiving notification
-        channel.assertExchange(exchange, "direct", { durable: true });
+        // Declare an EXCHANGE for receiving notification
+        channel.assertExchange(EXCHANGE, "direct", { durable: true });
 
         // Declare a queue for receiving notifications
         channel.assertQueue("", { exclusive: true }, (error, queue) => {
@@ -19,8 +19,7 @@ export const NotificationService = {
           }
           console.log("Rabbit - Notification service waiting for messages...");
 
-          // Bind queue to exchange
-          channel.bindQueue(queue.queue, exchange, "");
+          channel.bindQueue(queue.queue, EXCHANGE, "");
 
           // Consume messages from order service
           channel.consume(

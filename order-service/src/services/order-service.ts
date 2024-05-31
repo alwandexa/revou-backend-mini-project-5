@@ -56,21 +56,21 @@ const OrderService = {
     };
   },
   updateOrderService: () => {
-    const queue = "update_order_queue";
-    const exchange = "notification_exchange";
+    const QUEUE = "update_order_queue";
+    const EXCHANGE = "notification_exchange";
 
     getRabbitMQChannel((channel) => {
       // Declare a queue for receiving messages from inventory service
-      channel.assertQueue(queue, { durable: true });
+      channel.assertQueue(QUEUE, { durable: true });
 
-      // Declare an exchange for publishing notification
-      channel.assertExchange(exchange, "direct", { durable: true });
+      // Declare an EXCHANGE for publishing notification
+      channel.assertExchange(EXCHANGE, "direct", { durable: true });
 
       console.log("RabbitMQ - Update Order Service waiting for messages...");
 
       // Consume messages from inventory service
       channel.consume(
-        queue,
+        QUEUE,
         async (message) => {
           if (message) {
             const order = JSON.parse(message.content.toString());
@@ -81,7 +81,7 @@ const OrderService = {
             });
 
             // Publish notification
-            channel.publish(exchange, "", Buffer.from(JSON.stringify(order)));
+            channel.publish(EXCHANGE, "", Buffer.from(JSON.stringify(order)));
             console.log(
               "RabbitMQ - Notification sent for order using:",
               order.order_id

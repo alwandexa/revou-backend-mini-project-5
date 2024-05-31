@@ -24,17 +24,17 @@ export const InventoryService = {
     return allProducts;
   },
   checkInventoryRabbit: () => {
-    const queue = "inventory_check_queue";
+    const QUEUE = "inventory_check_queue";
 
     getRabbitMQChannel((channel) => {
       // Declare a queue for receiving messages from order service
-      channel.assertQueue(queue, { durable: true });
+      channel.assertQueue(QUEUE, { durable: true });
 
       console.log("Rabbit - Inventory service waiting for messages...");
 
       // Consume messages from order service
       channel.consume(
-        queue,
+        QUEUE,
         async (message) => {
           if (message) {
             const connection = await pool.getConnection();
