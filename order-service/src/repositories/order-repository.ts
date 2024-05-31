@@ -32,10 +32,9 @@ const OrderRepository = {
     return result[0].insertId;
   },
   getOrderById: async (getOrderByIdRequest: GetOrderByIdRequest) => {
-    const query = `SELECT user_id, order_date, status, product_id, quantity FROM orders WHERE order_id = :orderId`;
-    const result = await pool.execute<RowDataPacket[]>(query, [
-      getOrderByIdRequest,
-    ]);
+    console.log(getOrderByIdRequest);
+    const query = `SELECT user_id, order_date, status, product_id, quantity FROM orders WHERE order_id = ${getOrderByIdRequest.order_id}`;
+    const result = await pool.execute<RowDataPacket[]>(query);
 
     return result[0];
   },
